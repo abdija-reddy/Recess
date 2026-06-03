@@ -102,6 +102,31 @@ async function initApp() {
     // Bind hash navigations for landing sections
     window.addEventListener('hashchange', handleHashNavigation);
     handleHashNavigation();
+
+    // Check if this is a password recovery redirect from email link
+    const hash = window.location.hash || '';
+    const isRecovery = hash.includes('type=recovery') || (hash.includes('access_token=') && hash.includes('recovery'));
+    if (isRecovery) {
+      history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      if (currentUser) {
+        openAuthModal('forgot-reset', { userId: currentUser.id });
+      } else {
+        setTimeout(async () => {
+          currentUser = await window.db.getCurrentUser();
+          if (currentUser) {
+            document.getElementById('public-nav').classList.add('hidden');
+            document.getElementById('public-footer').classList.add('hidden');
+            document.getElementById('authenticated-portal').classList.remove('hidden');
+            await syncUserStorageData();
+            renderSidebar();
+            navigateTo('view-dashboard');
+            openAuthModal('forgot-reset', { userId: currentUser.id });
+          } else {
+            alert('Failed to retrieve secure recovery session. Please try clicking the reset link again.');
+          }
+        }, 800);
+      }
+    }
   } catch (e) {
     console.error('App initialization crash', e);
   }
@@ -727,11 +752,25 @@ async function handleForgotEmailSubmit(e) {
 
   try {
     const otp = await window.db.sendPasswordResetOtp(email);
-    let msg = 'OTP code sent! Please check your email.';
     if (otp && typeof otp === 'string') {
-      msg = `🌸 Sandbox Mode: Use OTP code <b>${otp}</b> to verify!`;
+      const msg = `🌸 Sandbox Mode: Use OTP code <b>${otp}</b> to verify!`;
+      renderAuthModalContent('forgot-otp', { email, message: msg });
+    } else {
+      // Cloud Mode: Supabase sent a reset link to their email
+      const content = document.getElementById('auth-modal-content');
+      content.innerHTML = `
+        <div class="text-center py-6">
+          <div class="flex justify-center mb-4">
+            <span class="text-5xl animate-bounce">📧</span>
+          </div>
+          <h3 class="font-display text-2xl font-bold text-zinc-800 mb-2">Check Your Email</h3>
+          <p class="text-zinc-600 mb-6 font-semibold px-2">
+            We have sent a secure password reset link to <b>${escapeHtml(email)}</b>. Please click the link in your email to reset your password.
+          </p>
+          <button onclick="closeAuthModal()" class="w-full py-3 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold rounded-xl border-2 border-zinc-800 shadow-planner">Okay</button>
+        </div>
+      `;
     }
-    renderAuthModalContent('forgot-otp', { email, message: msg });
   } catch (err) {
     if (errorBox) {
       errorBox.textContent = err.message || 'Failed to send OTP.';
