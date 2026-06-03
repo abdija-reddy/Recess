@@ -52,13 +52,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initApp();
 });
 
-// ----------------------------------------------------
-// BOOTSTRAP APPLICATION
-// ----------------------------------------------------
+function applyTheme() {
+  if (currentUser && currentUser.theme === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 async function initApp() {
   try {
     // 1. Fetch active session
     currentUser = await window.db.getCurrentUser();
+    applyTheme();
 
     // 2. Clear page loadings, build nav buttons
     renderNav();
@@ -114,6 +120,7 @@ async function initApp() {
         setTimeout(async () => {
           currentUser = await window.db.getCurrentUser();
           if (currentUser) {
+            applyTheme();
             document.getElementById('public-nav').classList.add('hidden');
             document.getElementById('public-footer').classList.add('hidden');
             document.getElementById('authenticated-portal').classList.remove('hidden');
@@ -2628,20 +2635,8 @@ function initSettingsPage() {
         </div>
       </div>
 
-      <!-- EXPORTS & DATA (1/3 width) -->
+      <!-- SIDEBAR (1/3 width) -->
       <div class="space-y-6">
-        <div class="bg-white border-4 border-zinc-800 rounded-3xl p-6 shadow-planner flex flex-col justify-between">
-          <div class="flex items-center gap-2 mb-4 border-b-2 border-zinc-100 pb-3">
-            <span>📥</span>
-            <h3 class="font-display text-lg font-extrabold text-zinc-800">Planner Backup</h3>
-          </div>
-          <p class="text-xs text-zinc-500 font-semibold leading-relaxed mb-6">Values your database integrity. Download backups for safe custody, or trigger a physical PDF save sheet!</p>
-          <div class="space-y-3">
-            <button onclick="handleSettingsExportData()" class="w-full py-2.5 bg-brand-blue hover:bg-blue-100 text-zinc-800 text-xs font-bold border-2 border-zinc-800 rounded-xl flex items-center justify-center gap-2 shadow-planner-sm transition-all cursor-pointer">Export JSON Data</button>
-            <button onclick="handleSettingsPrint()" class="w-full py-2.5 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-bold border-2 border-zinc-800 rounded-xl flex items-center justify-center gap-2 shadow-planner-sm transition-all cursor-pointer">Print / Save PDF</button>
-          </div>
-        </div>
-
         <div class="bg-white border-4 border-zinc-800 rounded-3xl p-6 shadow-planner text-center">
           <span class="text-3xl block mb-2">⚠️</span>
           <h4 class="font-display font-extrabold text-zinc-800 text-base mb-1">Delete Journal Account</h4>
