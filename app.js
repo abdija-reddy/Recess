@@ -69,6 +69,20 @@ async function initApp() {
       document.getElementById('public-footer').classList.add('hidden');
       document.getElementById('authenticated-portal').classList.remove('hidden');
       
+      // Determine if sidebar should be open based on screen width
+      isSidebarOpen = window.innerWidth >= 768;
+      const sidebar = document.getElementById('sidebar-container');
+      const toggleBtnArrow = document.getElementById('sidebar-toggle-arrow');
+      if (sidebar && toggleBtnArrow) {
+        if (isSidebarOpen) {
+          sidebar.className = "bg-brand-cream border-l-4 border-zinc-800 h-screen py-8 flex flex-col justify-between transition-all duration-300 w-64 px-6";
+          toggleBtnArrow.textContent = '›';
+        } else {
+          sidebar.className = "bg-brand-cream border-l-4 border-zinc-800 h-screen py-8 flex flex-col justify-between transition-all duration-300 w-0 px-0 overflow-hidden border-l-0";
+          toggleBtnArrow.textContent = '‹';
+        }
+      }
+
       // Seed details
       await syncUserStorageData();
       renderSidebar();
@@ -163,6 +177,11 @@ function navigateTo(viewId) {
 
   // Sync sidebar active styling highlight
   updateSidebarHighlight(viewId);
+
+  // Auto-close sidebar on mobile after navigation
+  if (window.innerWidth < 768 && isSidebarOpen) {
+    toggleSidebar();
+  }
 }
 
 function navigateToLanding() {
@@ -1470,7 +1489,7 @@ function initCalendarPage() {
     </header>
 
     <!-- CALENDAR BOX -->
-    <div class="bg-white border-4 border-zinc-800 rounded-3xl p-6 md:p-8 shadow-planner max-w-4xl mx-auto relative overflow-hidden">
+    <div class="bg-white border-4 border-zinc-800 rounded-3xl p-3 md:p-8 shadow-planner max-w-4xl mx-auto relative overflow-hidden">
       
       <div class="flex items-center justify-between mb-8 border-b-2 border-zinc-100 pb-4">
         <button onclick="handleCalendarMonthShift(-1)" class="p-2 border-2 border-zinc-800 rounded-xl hover:bg-zinc-50 shadow-planner-sm hover:-translate-y-0.5 transition-all text-zinc-800 font-bold">‹</button>
@@ -1548,7 +1567,7 @@ function initJournalPage() {
       <div class="hidden lg:block absolute left-[42%] top-0 bottom-0 w-8 bg-zinc-50 border-r border-l border-zinc-200 z-10 notebook-rings opacity-40"></div>
 
       <!-- LEFT SIDEPast Entries List (5/12 width) -->
-      <div class="lg:col-span-5 space-y-6 pr-4 lg:border-r border-zinc-100 min-h-[460px]">
+      <div class="lg:col-span-5 space-y-6 pr-4 lg:border-r border-zinc-100 lg:min-h-[460px] min-h-0">
         <div class="flex items-center gap-2 mb-4 pb-2 border-b border-zinc-100">
           <span>📖</span>
           <h3 class="font-display font-extrabold text-lg text-zinc-800">My Reflections</h3>
