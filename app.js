@@ -517,7 +517,7 @@ function closeAuthModal() {
   document.getElementById('auth-modal').classList.add('hidden');
 }
 
-function renderAuthModalContent(view) {
+function renderAuthModalContent(view, extraData = {}) {
   const content = document.getElementById('auth-modal-content');
   if (!content) return;
 
@@ -547,29 +547,102 @@ function renderAuthModalContent(view) {
         </div>
       </div>
     `;
-  } else {
-    const isSignIn = view === 'signin';
-    const isForgot = view === 'forgot';
-    
+  } else if (view === 'forgot' || view === 'forgot-email') {
     content.innerHTML = `
       <div class="flex items-center gap-2 mb-6">
         <span class="text-2xl animate-spin-slow">🌸</span>
         <h3 class="font-display text-2xl font-bold text-zinc-800">
-          ${isSignIn ? 'Welcome Back' : isForgot ? 'Reset Password' : 'Create Your Journal'}
+          Reset Password
         </h3>
       </div>
       <div id="auth-error-box" class="hidden mb-4 p-3 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl text-sm font-semibold"></div>
       <div id="auth-success-box" class="hidden mb-4 p-3 bg-green-50 border-2 border-emerald-200 text-emerald-700 rounded-xl text-sm font-semibold"></div>
       
-      ${!isForgot ? `
-        <div class="mb-4">
-          ${GOOGLE_BTN_HTML}
-          ${OR_SEPARATOR_HTML}
+      <form onsubmit="handleForgotEmailSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-zinc-700 font-bold mb-1.5 text-sm">Email Address</label>
+          <input type="email" id="forgot-email-input" required placeholder="name@domain.com" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
         </div>
-      ` : ''}
+        <button type="submit" id="auth-submit-btn" class="w-full mt-4 py-3 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold rounded-xl border-2 border-zinc-800 shadow-planner hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2">
+          Send OTP Code
+        </button>
+      </form>
+      
+      <div class="mt-6 pt-4 border-t border-zinc-200 text-center text-sm font-semibold text-zinc-500">
+        <button onclick="renderAuthModalContent('signin')" class="text-zinc-600 hover:underline font-bold">Back to Sign In</button>
+      </div>
+    `;
+  } else if (view === 'forgot-otp') {
+    content.innerHTML = `
+      <div class="flex items-center gap-2 mb-6">
+        <span class="text-2xl animate-spin-slow">🌸</span>
+        <h3 class="font-display text-2xl font-bold text-zinc-800">
+          Verify OTP
+        </h3>
+      </div>
+      <div id="auth-error-box" class="hidden mb-4 p-3 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl text-sm font-semibold"></div>
+      <div id="auth-success-box" class="p-3 bg-green-50 border-2 border-emerald-200 text-emerald-700 rounded-xl text-sm font-semibold mb-4">
+        ${extraData.message || 'OTP code sent! Please check your email.'}
+      </div>
+      
+      <form onsubmit="handleForgotOtpSubmit(event, '${escapeHtml(extraData.email)}')" class="space-y-4">
+        <div>
+          <label class="block text-zinc-700 font-bold mb-1.5 text-sm">6-Digit OTP Code</label>
+          <input type="text" id="forgot-otp-input" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm text-center tracking-widest text-lg font-bold" />
+        </div>
+        <button type="submit" id="auth-submit-btn" class="w-full mt-4 py-3 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold rounded-xl border-2 border-zinc-800 shadow-planner hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2">
+          Verify Code
+        </button>
+      </form>
+      
+      <div class="mt-6 pt-4 border-t border-zinc-200 text-center text-sm font-semibold text-zinc-500">
+        <button onclick="renderAuthModalContent('forgot-email')" class="text-zinc-600 hover:underline font-bold">Resend OTP</button>
+      </div>
+    `;
+  } else if (view === 'forgot-reset') {
+    content.innerHTML = `
+      <div class="flex items-center gap-2 mb-6">
+        <span class="text-2xl animate-spin-slow">🌸</span>
+        <h3 class="font-display text-2xl font-bold text-zinc-800">
+          New Password
+        </h3>
+      </div>
+      <div id="auth-error-box" class="hidden mb-4 p-3 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl text-sm font-semibold"></div>
+      
+      <form onsubmit="handleForgotResetSubmit(event, '${escapeHtml(extraData.userId)}')" class="space-y-4">
+        <div>
+          <label class="block text-zinc-700 font-bold mb-1.5 text-sm">New Password</label>
+          <input type="password" id="forgot-password-input" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
+        </div>
+        <div>
+          <label class="block text-zinc-700 font-bold mb-1.5 text-sm">Confirm Password</label>
+          <input type="password" id="forgot-confirm-input" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
+        </div>
+        <button type="submit" id="auth-submit-btn" class="w-full mt-4 py-3 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold rounded-xl border-2 border-zinc-800 shadow-planner hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2">
+          Reset Password
+        </button>
+      </form>
+    `;
+  } else {
+    const isSignIn = view === 'signin';
+    
+    content.innerHTML = `
+      <div class="flex items-center gap-2 mb-6">
+        <span class="text-2xl animate-spin-slow">🌸</span>
+        <h3 class="font-display text-2xl font-bold text-zinc-800">
+          ${isSignIn ? 'Welcome Back' : 'Create Your Journal'}
+        </h3>
+      </div>
+      <div id="auth-error-box" class="hidden mb-4 p-3 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl text-sm font-semibold"></div>
+      <div id="auth-success-box" class="hidden mb-4 p-3 bg-green-50 border-2 border-emerald-200 text-emerald-700 rounded-xl text-sm font-semibold"></div>
+      
+      <div class="mb-4">
+        ${GOOGLE_BTN_HTML}
+        ${OR_SEPARATOR_HTML}
+      </div>
 
       <form onsubmit="handleAuthSubmit(event, '${view}')" class="space-y-4">
-        ${!isSignIn && !isForgot ? `
+        ${!isSignIn ? `
           <div>
             <label class="block text-zinc-700 font-bold mb-1.5 text-sm">First Name</label>
             <input type="text" id="auth-name" required placeholder="Sarah" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
@@ -581,28 +654,24 @@ function renderAuthModalContent(view) {
           <input type="email" id="auth-email" required placeholder="name@domain.com" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
         </div>
 
-        ${!isForgot ? `
-          <div>
-            <div class="flex justify-between items-center mb-1.5">
-              <label class="text-zinc-700 font-bold text-sm">Password</label>
-              ${isSignIn ? `
-                <button type="button" onclick="renderAuthModalContent('forgot')" class="text-xs text-zinc-400 hover:underline font-bold">Forgot?</button>
-              ` : ''}
-            </div>
-            <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="text-zinc-700 font-bold text-sm">Password</label>
+            ${isSignIn ? `
+              <button type="button" onclick="renderAuthModalContent('forgot')" class="text-xs text-zinc-400 hover:underline font-bold">Forgot?</button>
+            ` : ''}
           </div>
-        ` : ''}
+          <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border-2 border-zinc-800 bg-white text-zinc-800 focus:outline-none focus:bg-brand-cream font-semibold text-sm" />
+        </div>
 
         <button type="submit" id="auth-submit-btn" class="w-full mt-4 py-3 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold rounded-xl border-2 border-zinc-800 shadow-planner hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2">
-          ${isSignIn ? 'Sign In' : isForgot ? 'Send Reset Link' : 'Start My Planner'}
+          ${isSignIn ? 'Sign In' : 'Start My Planner'}
         </button>
       </form>
 
       <div class="mt-6 pt-4 border-t border-zinc-200 text-center text-sm font-semibold text-zinc-500">
         ${isSignIn ? `
           <p>New to Recess? <button onclick="renderAuthModalContent('signup')" class="text-brand-pink hover:underline font-bold">Create a free account</button></p>
-        ` : isForgot ? `
-          <button onclick="renderAuthModalContent('signin')" class="text-zinc-600 hover:underline font-bold">Back to Sign In</button>
         ` : `
           <p>Already have an account? <button onclick="renderAuthModalContent('signin')" class="text-brand-blue hover:underline font-bold">Sign in here</button></p>
         `}
@@ -624,7 +693,7 @@ async function handleAuthSubmit(e, viewType) {
 
   try {
     const email = document.getElementById('auth-email').value;
-    const password = isForgot(viewType) ? '' : document.getElementById('auth-password').value;
+    const password = document.getElementById('auth-password').value;
     
     if (viewType === 'signin') {
       await window.db.signIn(email, password);
@@ -636,17 +705,120 @@ async function handleAuthSubmit(e, viewType) {
       await window.db.signUp(email, password, name);
       closeAuthModal();
       await initApp();
-    } else if (viewType === 'forgot') {
-      await window.db.resetPassword(email);
-      successBox.textContent = 'Password reset instructions have been simulated in consoles!';
-      successBox.classList.remove('hidden');
     }
   } catch (err) {
     errorBox.textContent = err.message || 'Authentication failed.';
     errorBox.classList.remove('hidden');
   } finally {
     btn.disabled = false;
-    btn.textContent = viewType === 'signin' ? 'Sign In' : viewType === 'forgot' ? 'Send Reset Link' : 'Start My Planner';
+    btn.textContent = viewType === 'signin' ? 'Sign In' : 'Start My Planner';
+  }
+}
+
+async function handleForgotEmailSubmit(e) {
+  e.preventDefault();
+  const errorBox = document.getElementById('auth-error-box');
+  const btn = document.getElementById('auth-submit-btn');
+  const email = document.getElementById('forgot-email-input').value;
+
+  if (errorBox) errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="w-5 h-5 border-2 border-zinc-800 border-t-transparent rounded-full animate-spin"></span>`;
+
+  try {
+    const otp = await window.db.sendPasswordResetOtp(email);
+    let msg = 'OTP code sent! Please check your email.';
+    if (otp && typeof otp === 'string') {
+      msg = `🌸 Sandbox Mode: Use OTP code <b>${otp}</b> to verify!`;
+    }
+    renderAuthModalContent('forgot-otp', { email, message: msg });
+  } catch (err) {
+    if (errorBox) {
+      errorBox.textContent = err.message || 'Failed to send OTP.';
+      errorBox.classList.remove('hidden');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send OTP Code';
+  }
+}
+
+async function handleForgotOtpSubmit(e, email) {
+  e.preventDefault();
+  const errorBox = document.getElementById('auth-error-box');
+  const btn = document.getElementById('auth-submit-btn');
+  const otpCode = document.getElementById('forgot-otp-input').value;
+
+  if (errorBox) errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="w-5 h-5 border-2 border-zinc-800 border-t-transparent rounded-full animate-spin"></span>`;
+
+  try {
+    const userId = await window.db.verifyPasswordResetOtp(email, otpCode);
+    renderAuthModalContent('forgot-reset', { userId });
+  } catch (err) {
+    if (errorBox) {
+      errorBox.textContent = err.message || 'Invalid OTP code.';
+      errorBox.classList.remove('hidden');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Verify Code';
+  }
+}
+
+async function handleForgotResetSubmit(e, userId) {
+  e.preventDefault();
+  const errorBox = document.getElementById('auth-error-box');
+  const btn = document.getElementById('auth-submit-btn');
+  const newPassword = document.getElementById('forgot-password-input').value;
+  const confirmPassword = document.getElementById('forgot-confirm-input').value;
+
+  if (errorBox) errorBox.classList.add('hidden');
+  
+  if (newPassword.length < 8) {
+    if (errorBox) {
+      errorBox.textContent = 'Password must be at least 8 characters long.';
+      errorBox.classList.remove('hidden');
+    }
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    if (errorBox) {
+      errorBox.textContent = 'Passwords do not match.';
+      errorBox.classList.remove('hidden');
+    }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="w-5 h-5 border-2 border-zinc-800 border-t-transparent rounded-full animate-spin"></span>`;
+
+  try {
+    await window.db.updatePassword(userId, newPassword);
+    
+    try {
+      await window.db.signOut();
+    } catch (e) {}
+
+    const content = document.getElementById('auth-modal-content');
+    content.innerHTML = `
+      <div class="text-center py-6">
+        <span class="text-5xl">🎉</span>
+        <h3 class="font-display text-2xl font-bold text-zinc-800 mt-4 mb-2">Password Reset Successful!</h3>
+        <p class="text-zinc-500 font-semibold text-sm mb-6">You can now sign in with your new password.</p>
+        <button onclick="renderAuthModalContent('signin')" class="w-full py-3 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold rounded-xl border-2 border-zinc-800 shadow-planner">Sign In</button>
+      </div>
+    `;
+  } catch (err) {
+    if (errorBox) {
+      errorBox.textContent = err.message || 'Failed to reset password.';
+      errorBox.classList.remove('hidden');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Reset Password';
   }
 }
 

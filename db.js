@@ -107,6 +107,7 @@ const KEYS = {
 window.db = {
   isCloudMode: () => isCloud(),
   getDemoData: () => DEMO_DATA,
+  _localOtps: {},
 
   // ----------------------------------------------------
   // AUTHENTICATION CONTROLLERS
@@ -302,6 +303,46 @@ window.db = {
       localStorage.removeItem('recess_active_session');
     }
     window.location.reload();
+  },
+
+  async sendPasswordResetOtp(email) {
+    if (isCloud()) {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      return true;
+    } else {
+      const users = getLocal(KEYS.USERS, []);
+      const matched = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!matched) {
+        throw new Error('No account found with this email address.');
+      }
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      this._localOtps[email.toLowerCase()] = otp;
+      console.log(`[Recess MOCK OTP] Password reset OTP for ${email}: ${otp}`);
+      return otp;
+    }
+  },
+
+  async verifyPasswordResetOtp(email, token) {
+    if (isCloud()) {
+      const { data, error } = await supabaseClient.auth.verifyOtp({
+        email,
+        token,
+        type: 'recovery'
+      });
+      if (error) throw error;
+      return data.user.id;
+    } else {
+      const storedOtp = this._localOtps[email.toLowerCase()];
+      if (!storedOtp || storedOtp !== token) {
+        throw new Error('Invalid OTP code. Please try again.');
+      }
+      const users = getLocal(KEYS.USERS, []);
+      const matched = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!matched) throw new Error('User not found.');
+      delete this._localOtps[email.toLowerCase()];
+      return matched.id;
+    }
   },
 
   // ----------------------------------------------------
