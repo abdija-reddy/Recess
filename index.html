@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recess | Your Personal Wellness Journal & Planner</title>
+    <meta name="description" content="Recess is a beautifully designed, aesthetic personal wellness planner. Track habits, meals, fitness, menstrual cycles, and journal reflections." />
+    
+    <!-- Google Fonts: Quicksand and Fredoka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS Browser CDN Configured with Custom Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Quicksand', 'sans-serif'],
+              display: ['Fredoka', 'sans-serif']
+            },
+            colors: {
+              brand: {
+                pink: '#FFEBEF',
+                blue: '#EBF5FF',
+                green: '#E8F7F0',
+                lavender: '#F0E6FF',
+                cream: '#FFFDF5'
+              }
+            },
+            boxShadow: {
+              planner: '4px 4px 0px 0px rgba(39, 39, 42, 1)',
+              'planner-sm': '2px 2px 0px 0px rgba(39, 39, 42, 1)',
+              'planner-lg': '6px 6px 0px 0px rgba(39, 39, 42, 1)'
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Core Style Overlay Sheet -->
+    <link rel="stylesheet" href="app.css" />
+
+    <!-- CDN Libraries: Supabase Client and Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="bg-[#FFFDF5] text-zinc-800 selection:bg-pink-100 selection:text-pink-600 transition-colors duration-200 min-h-screen flex flex-col justify-between">
+    
+    <!-- ==========================================
+         PUBLIC TOP NAVIGATION BAR
+         ========================================== -->
+    <nav id="public-nav" class="border-b-4 border-zinc-800 bg-[#FFFDF5] px-6 py-4 sticky top-0 z-40 transition-colors duration-200">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        
+        <a href="#public-landing" onclick="navigateToLanding(); return false;" class="flex items-center gap-2 group">
+          <span class="w-10 h-10 rounded-xl bg-brand-pink border-2 border-zinc-800 flex items-center justify-center font-display text-xl font-bold shadow-planner-sm group-hover:scale-105 transition-transform duration-200">
+            🌸
+          </span>
+          <span class="font-display text-2xl font-bold text-zinc-800 tracking-tight relative">
+            Recess
+          </span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-8 font-semibold text-zinc-600">
+          <a href="#public-landing" onclick="navigateToLanding(); return false;" class="hover:text-zinc-900 hover:underline decoration-brand-pink decoration-2 underline-offset-4 transition-colors">
+            Home
+          </a>
+          <a href="#features" class="hover:text-zinc-900 hover:underline decoration-brand-blue decoration-2 underline-offset-4 transition-colors">
+            Features
+          </a>
+          <a href="#public-footer" class="hover:text-zinc-900 hover:underline decoration-brand-green decoration-2 underline-offset-4 transition-colors">
+            About
+          </a>
+        </div>
+
+        <div id="nav-auth-buttons" class="flex items-center gap-4">
+          <!-- Populated dynamically via app.js (e.g. Sign In / Go to Journal) -->
+        </div>
+        
+      </div>
+    </nav>
+
+    <!-- ==========================================
+         MAIN VIEWS CONTAINERS
+         ========================================== -->
+    <main class="flex-1 flex flex-col justify-between">
+      
+      <!-- ------------------------------------
+           VIEW: PUBLIC LANDING PAGE
+           ------------------------------------ -->
+      <div id="view-landing" class="app-view block">
+        
+        <!-- SECTION 1: HERO -->
+        <section class="relative overflow-hidden py-20 px-6 border-b-4 border-zinc-800">
+          <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            <div class="space-y-6 text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-pink border-2 border-zinc-800 rounded-full font-bold text-xs uppercase tracking-widest shadow-planner-sm">
+                🌸 Your Personal Stationery Planner
+              </div>
+              <h1 class="font-display text-4xl sm:text-6xl font-extrabold text-zinc-800 leading-tight">
+                Your Personal <br />
+                <span class="relative inline-block">
+                  Wellness Journal
+                  <span class="absolute left-0 right-0 bottom-1 h-3 bg-brand-pink/40 -z-10 transform -rotate-1"></span>
+                </span>
+              </h1>
+              <p class="text-zinc-600 font-semibold text-lg md:text-xl leading-relaxed max-w-xl">
+                Track habits, meals, health, goals, and daily reflections in one beautiful digital notebook planner. Built for calm, private self-care.
+              </p>
+              <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <a href="#demo" class="px-6 py-3.5 bg-brand-green hover:bg-emerald-100 text-zinc-800 font-display font-bold text-base rounded-2xl border-2 border-zinc-800 shadow-planner hover:-translate-y-0.5 transition-all text-center">
+                  Explore Journal
+                </a>
+                <button onclick="openAuthModal('signup')" class="px-6 py-3.5 bg-brand-pink hover:bg-pink-100 text-zinc-800 font-display font-bold text-base rounded-2xl border-2 border-zinc-800 shadow-planner hover:-translate-y-0.5 transition-all text-center cursor-pointer">
+                  Create Account
+                </button>
+              </div>
+            </div>
+
+            <!-- Hero notebook cover mock illustration -->
+            <div class="flex justify-center items-center relative">
+              <div class="w-80 sm:w-96 aspect-[3/4] bg-white border-4 border-zinc-800 rounded-3xl p-6 shadow-planner-lg relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute left-0 top-0 bottom-0 w-8 bg-zinc-100 flex flex-col justify-around py-6 border-r-2 border-zinc-200">
+                  <div class="w-7 h-4 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10 -ml-3"></div>
+                  <div class="w-7 h-4 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10 -ml-3"></div>
+                  <div class="w-7 h-4 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10 -ml-3"></div>
+                  <div class="w-7 h-4 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10 -ml-3"></div>
+                  <div class="w-7 h-4 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10 -ml-3"></div>
+                </div>
+                <div class="pl-6 flex-1 flex flex-col justify-between h-full py-4">
+                  <div class="space-y-3">
+                    <div class="flex justify-between items-start">
+                      <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Recess Planner</span>
+                      <span class="text-xl">⭐</span>
+                    </div>
+                    <h3 class="font-display text-2xl font-extrabold text-zinc-800 border-b-2 border-zinc-100 pb-2">
+                      My Wellness Cover
+                    </h3>
+                  </div>
+                  <div class="space-y-3 my-6">
+                    <div class="p-2.5 bg-brand-cream/35 border-2 border-zinc-800 rounded-xl flex items-center justify-between text-xs font-bold">
+                      <span>💧 Drink 8 cups of water</span> <span class="text-emerald-500">✓</span>
+                    </div>
+                    <div class="p-2.5 bg-brand-pink/20 border-2 border-zinc-800 rounded-xl flex items-center justify-between text-xs font-bold">
+                      <span>🚶 Walk 10,000 steps</span> <span class="text-zinc-300">✕</span>
+                    </div>
+                    <div class="p-2.5 bg-brand-blue/30 border-2 border-zinc-800 rounded-xl flex items-center justify-between text-xs font-bold">
+                      <span>🌸 Sleep 8 hours</span> <span class="text-emerald-500">✓</span>
+                    </div>
+                  </div>
+                  <div class="flex justify-between items-end border-t border-zinc-100 pt-3">
+                    <span class="text-xl">🐱</span>
+                    <span class="text-[10px] font-bold text-zinc-400">June 2026</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </section>
+
+        <!-- SECTION 2: FEATURES -->
+        <section id="features" class="py-20 px-6 border-b-4 border-zinc-800 bg-white">
+          <div class="max-w-6xl mx-auto text-center space-y-12">
+            <div class="space-y-3">
+              <h2 class="font-display text-3xl md:text-5xl font-extrabold text-zinc-800">
+                Choose What You Track
+              </h2>
+              <p class="text-zinc-500 font-bold text-sm uppercase tracking-wider max-w-xl mx-auto">
+                Customizable modules tailored entirely to your personal routines.
+              </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="features-cards-container">
+              <!-- Cards populated dynamically via app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 3: DEMO CALENDAR -->
+        <section id="demo" class="py-20 px-6 border-b-4 border-zinc-800 bg-zinc-50/30">
+          <div class="max-w-5xl mx-auto text-center space-y-8">
+            <div class="space-y-3">
+              <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Section 3 Calendar Demo</span>
+              <h2 class="font-display text-3xl md:text-5xl font-extrabold text-zinc-800">
+                Interactive Demo Planner
+              </h2>
+              <p class="text-zinc-500 font-semibold text-sm max-w-xl mx-auto leading-relaxed">
+                Explore our physical planner aesthetic. Click dates to log details or write journal notes! Saving edits will trigger account prompts.
+              </p>
+            </div>
+            
+            <div class="bg-brand-pink/20 border-2 border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-planner-sm max-w-4xl mx-auto">
+              <span class="text-sm font-bold text-zinc-800">🌸 You are viewing the interactive Demo Calendar. Logins or edits will require saving an account.</span>
+              <button onclick="openAuthModal('intercept')" class="px-4 py-1.5 bg-brand-pink hover:bg-pink-100 text-zinc-800 text-xs font-extrabold border-2 border-zinc-800 rounded-xl shadow-planner-sm shrink-0">Sign In / Sign Up</button>
+            </div>
+
+            <!-- Demo monthly grid container -->
+            <div id="demo-calendar-container" class="bg-white border-4 border-zinc-800 rounded-3xl p-6 md:p-8 shadow-planner max-w-4xl mx-auto">
+              <!-- Calendar grid content rendered dynamically via app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 4: HOW IT WORKS -->
+        <section id="how-it-works" class="py-20 px-6 border-b-4 border-zinc-800 bg-white">
+          <div class="max-w-6xl mx-auto text-center space-y-12">
+            <div class="space-y-3">
+              <h2 class="font-display text-3xl md:text-5xl font-extrabold text-zinc-800">
+                Simplicity Over Feature Overload
+              </h2>
+              <p class="text-zinc-500 font-bold text-sm uppercase tracking-wider">
+                Four quick steps to start daily mindfulness.
+              </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="howitworks-container">
+              <!-- Dynamic How it works cards -->
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 5: TESTIMONIALS -->
+        <section class="py-20 px-6 border-b-4 border-zinc-800 bg-[#FFFDF5]">
+          <div class="max-w-5xl mx-auto text-center space-y-12">
+            <h2 class="font-display text-3xl md:text-5xl font-extrabold text-zinc-800">
+              Loved by Journal Lovers
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="testimonials-container">
+              <!-- Dynamic reviews -->
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ------------------------------------
+           AUTHENTICATED PORTAL BASE LAYOUT
+           ------------------------------------ -->
+      <div id="authenticated-portal" class="hidden min-h-screen flex text-zinc-800">
+        
+        <!-- Left Side Page Display (80% width) -->
+        <div id="portal-content" class="flex-1 overflow-y-auto p-6 md:p-12 relative">
+          
+          <!-- Binder Ring Columns along the left border of authenticated portal -->
+          <div class="absolute left-0 top-0 bottom-0 w-8 bg-zinc-100/50 border-r-2 border-zinc-200 no-print">
+            <div class="absolute top-0 bottom-0 left-0 w-8 flex flex-col justify-around items-center py-6 pointer-events-none z-20">
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+              <div class="relative w-7 h-4 flex items-center"><div class="absolute -left-3 w-6 h-3.5 border-2 border-zinc-800 bg-zinc-200 rounded-full shadow-sm z-10"></div><div class="w-1.5 h-1.5 bg-zinc-800 rounded-full ml-1"></div></div>
+            </div>
+          </div>
+
+          <!-- PORTAL PAGE VIEWS SUB-SHEETS -->
+          <div class="max-w-5xl mx-auto pl-8">
+            
+            <!-- VIEW: PORTAL DASHBOARD -->
+            <div id="view-dashboard" class="portal-view hidden space-y-10">
+              <!-- Dashboard contents dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL CALENDAR -->
+            <div id="view-calendar" class="portal-view hidden space-y-8">
+              <!-- Calendar contents dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL JOURNAL -->
+            <div id="view-journal" class="portal-view hidden space-y-8">
+              <!-- Journal splits sheets dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL TRACKERS CONFIG -->
+            <div id="view-trackers" class="portal-view hidden space-y-8">
+              <!-- Trackers list dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL STATISTICS -->
+            <div id="view-stats" class="portal-view hidden space-y-10">
+              <!-- Chart analytics dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL MENSTRUAL CYCLE -->
+            <div id="view-cycle" class="portal-view hidden space-y-8">
+              <!-- Cycle logs dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL SETTINGS -->
+            <div id="view-settings" class="portal-view hidden space-y-8">
+              <!-- Settings sheets dynamically populated -->
+            </div>
+
+            <!-- VIEW: PORTAL ABOUT -->
+            <div id="view-about" class="portal-view hidden space-y-8">
+              <!-- About information dynamically populated -->
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Side Collapsible Sidebar Panel (20% width) -->
+        <aside id="collapsible-sidebar" class="relative flex z-30 no-print">
+          <button onclick="toggleSidebar()" class="absolute left-[-34px] top-24 w-9 h-12 bg-brand-cream border-2 border-zinc-800 border-r-0 rounded-l-xl flex items-center justify-center shadow-[-3px_3px_0px_0px_rgba(39,39,42,1)] cursor-pointer text-zinc-800 hover:bg-zinc-100 z-40 font-bold">
+            <span id="sidebar-toggle-arrow">›</span>
+          </button>
+          
+          <div id="sidebar-container" class="bg-brand-cream border-l-4 border-zinc-800 h-screen py-8 flex flex-col justify-between transition-all duration-300 w-64 px-6">
+            <!-- Sidebar elements dynamically populated -->
+          </div>
+        </aside>
+
+      </div>
+
+    </main>
+
+    <!-- ==========================================
+         PUBLIC WEBSITE FOOTER
+         ========================================== -->
+    <footer id="public-footer" class="py-12 bg-zinc-900 text-white px-6">
+      <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="md:col-span-2 space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-brand-pink text-zinc-800 border-2 border-zinc-800 flex items-center justify-center font-display text-md font-bold">🌸</span>
+            <span class="font-display text-xl font-bold tracking-tight">Recess</span>
+          </div>
+          <p class="text-zinc-400 font-semibold text-xs leading-relaxed max-w-sm">
+            Recess is a beautifully customized digital planner inspired by cute stationery, notebooks, and stickers. Manage your wellness privately.
+          </p>
+        </div>
+        <div class="space-y-3.5">
+          <h4 class="font-display font-extrabold text-sm uppercase tracking-widest text-zinc-400">Explore</h4>
+          <div class="flex flex-col gap-2 text-xs font-semibold text-zinc-300">
+            <a href="#features" class="hover:underline">Features</a>
+            <a href="#demo" class="hover:underline">Demo Planner</a>
+            <a href="#how-it-works" class="hover:underline">How It Works</a>
+          </div>
+        </div>
+        <div class="space-y-3.5">
+          <h4 class="font-display font-extrabold text-sm uppercase tracking-widest text-zinc-400">Legal</h4>
+          <div class="flex flex-col gap-2 text-xs font-semibold text-zinc-300">
+            <span class="hover:underline cursor-pointer">Privacy Policy</span>
+            <span class="hover:underline cursor-pointer">Terms of Service</span>
+            <span class="hover:underline cursor-pointer">Contact Support</span>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-zinc-800 max-w-6xl mx-auto mt-8 pt-6 text-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+        Recess Planner © 2026. All rights preserved. Keep self-care calm.
+      </div>
+    </footer>
+
+    <!-- ==========================================
+         MODAL: AUTHENTICATION LOGIN/SIGNUP
+         ========================================== -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+      <div class="relative bg-[#FFFDF5] border-4 border-zinc-800 rounded-3xl p-8 max-w-md w-full shadow-planner-lg overflow-hidden">
+        <div class="absolute -top-3 -right-3 w-16 h-16 bg-brand-pink border-b-4 border-l-4 border-zinc-800 rotate-45 pointer-events-none"></div>
+        <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-800 w-8 h-8 flex items-center justify-center font-bold text-xl border-2 border-transparent hover:border-zinc-800 hover:bg-zinc-100 rounded-full transition-all">✕</button>
+        
+        <div id="auth-modal-content">
+          <!-- Toggled Views: 'intercept', 'signin', 'signup', 'forgot' dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: DATE DETAILS SLIDING DRAWER
+         ========================================== -->
+    <div id="details-drawer" class="fixed inset-0 z-50 flex justify-end hidden">
+      <div onclick="closeDetailsDrawer()" class="absolute inset-0 bg-black/30 backdrop-blur-xs"></div>
+      <div class="relative w-full max-w-lg bg-[#FFFDF5] h-full border-l-4 border-zinc-800 shadow-planner-lg flex flex-col justify-between overflow-hidden z-10">
+        <div class="absolute left-0 top-0 bottom-0 w-4 bg-zinc-100 border-r border-zinc-300"></div>
+        <div class="px-8 py-5 border-b-4 border-zinc-800 flex items-center justify-between ml-4">
+          <div>
+            <span class="text-xs font-bold text-brand-pink uppercase tracking-widest">Wellness Log</span>
+            <h3 id="drawer-date-header" class="font-display text-xl md:text-2xl font-extrabold text-zinc-800 mt-0.5">Date</h3>
+          </div>
+          <button onclick="closeDetailsDrawer()" class="p-1.5 border-2 border-zinc-800 rounded-xl hover:bg-zinc-100 transition-all"><span class="font-bold">✕</span></button>
+        </div>
+        
+        <div id="drawer-body-content" class="flex-1 overflow-y-auto px-8 py-6 ml-4 space-y-6">
+          <!-- Dynamically populated log inputs (reflections, mood, numeric defaults, cycle data) -->
+        </div>
+
+        <div id="drawer-footer-actions" class="px-8 py-5 border-t-4 border-zinc-800 bg-[#FFFDF5] flex gap-4 ml-4">
+          <!-- Dynamically populated save options -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dynamic Router Execution File -->
+    <script src="db.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
